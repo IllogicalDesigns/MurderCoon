@@ -58,7 +58,7 @@ public class Commander : MonoBehaviour
 				}
 				if (hit.collider.tag != "Enemy") {
 					for (int i = 0; i < ourGuys.Count; i++) {
-						ourGuys [i].KillThisGuy (hit.collider);
+						ourGuys [i].KillThisGuy (hit.point);
 					}
 				}
 			}
@@ -76,6 +76,10 @@ public class Commander : MonoBehaviour
 	// Update is called once per frame
 	private void Update ()
 	{
+		if (Input.GetKeyDown (KeyCode.Space))
+			Application.LoadLevel ("test");
+		if (Input.GetKeyDown (KeyCode.Escape))
+			Application.Quit ();
 		CheckCamera ();
 		MoveUnits ();
 	}

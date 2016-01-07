@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
-public class BaseUnit : MonoBehaviour
-{
+public class BaseEnemy : MonoBehaviour {
 	bool selected = false;
 	public Vector3 target;
 	[SerializeField] private Renderer myRend;
@@ -22,7 +21,6 @@ public class BaseUnit : MonoBehaviour
 	[SerializeField] private AudioClip testGun;
 	[SerializeField] private AudioClip testReload;
 	[SerializeField] private AudioClip testOutOfAmmo;
-	[SerializeField] private Slider ammoSlider;
 	[SerializeField] private ParticleSystem testShot;
 	[SerializeField] private float clipCap = 1f;
 	private float clipCurrCap;
@@ -36,18 +34,6 @@ public class BaseUnit : MonoBehaviour
 	{
 		clipCurrCap = clipCap;
 		ammoCurrCap = ammoCap;
-		ammoSlider.maxValue = ammoCap;
-		UpdateAmmoSlider ();
-	}
-
-	public void SetMyTarget (Vector3 Destination)
-	{
-		myAgent.SetDestination (Destination);
-	}
-
-	public void KillThisGuy (Vector3 Destination)
-	{
-		myAgent.SetDestination (Destination);
 	}
 
 	IEnumerator Attack (Collider who, float attkTime, float modifiers, float damageDice)
@@ -79,22 +65,16 @@ public class BaseUnit : MonoBehaviour
 			clipCurrCap = ammoCurrCap;
 			ammoCurrCap -= clipCurrCap;
 		}
-		UpdateAmmoSlider ();
 		isAttacking = false;
 	}
-
-	private void UpdateAmmoSlider () {
-		ammoSlider.value = ammoCurrCap;
-	}
-
 
 	void Vision ()
 	{
 		Collider[] myCols = Physics.OverlapSphere (transform.position, myCol.radius);
 		for (int i = 0; i < myCols.Length; i++) {
-			
+
 			// If the player has entered the trigger sphere...
-			if (myCols [i].tag == "Enemy") {
+			if (myCols [i].tag == "Player") {
 				// By default the player is not in sight.
 				playerInSight = false;
 				target = Vector3.zero;
@@ -110,7 +90,7 @@ public class BaseUnit : MonoBehaviour
 					// ... and if a raycast towards the player hits something...
 					if (Physics.Raycast (transform.position + transform.up, direction.normalized, out hit, myCol.radius)) {
 						// ... and if the raycast hits the player...
-						if (hit.collider.gameObject.tag == "Enemy" && !isAttacking && clipCurrCap > 0) {
+						if (hit.collider.gameObject.tag == "Player" && !isAttacking && clipCurrCap > 0) {
 							Debug.DrawRay (transform.position + transform.up, direction.normalized * 10f, Color.red); 
 							playerInSight = true;
 							target = hit.collider.transform.position;
@@ -126,11 +106,6 @@ public class BaseUnit : MonoBehaviour
 	{
 		if (clipCurrCap == 0 && !isAttacking && ammoCurrCap > 0)
 			StartCoroutine (Reload (reloadimer));
-		if (clipCurrCap <= clipCap / 2 && !isAttacking && !playerInSight && ammoCurrCap > 0) {
-			ammoCurrCap += clipCurrCap;
-			clipCurrCap = 0;
-			StartCoroutine (Reload (reloadimer));
-		}
 		if (ammoCurrCap == 0 && !outOfAmmo && clipCurrCap == 0) {
 			Debug.Log ("Out Of Ammo " + this.name);
 			outOfAmmo = true;
